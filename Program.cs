@@ -13,8 +13,6 @@ namespace family_calendar
     {
         public static void Main(string[] args)
         {
-            Console.WriteLine(".NET Core Graph Tutorial\n");
-
             var appConfig = LoadAppSettings();
 
             if (appConfig == null)

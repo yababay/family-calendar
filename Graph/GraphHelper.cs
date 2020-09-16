@@ -5,14 +5,15 @@ using System.Threading.Tasks;
 
 namespace family_calendar
 {
-    internal class EventHolder {
-        string subject;
-        Date date;
+    public class EventHolder {
+        public string Subject;
+        public string Category = "default";
+        public DateTimeOffset Date;
     }
 
     public interface IGraphHelper {
         public bool IsConnected();
-        public void ListCalendarEvents();
+        public List<EventHolder> ListCalendarEvents();
     }
 
     public class GraphHelper : IGraphHelper
@@ -41,7 +42,7 @@ namespace family_calendar
                 return null;
             }
         }
-
+ 
         // <GetEventsSnippet>
         public static async Task<IEnumerable<Event>> GetEventsAsync()
         {
@@ -52,9 +53,8 @@ namespace family_calendar
                     // Only return the fields used by the application
                     .Select(e => new {
                       e.Subject,
-                      e.Organizer,
                       e.Start,
-                      e.End
+                      e.Categories,
                     })
                     // Sort results by when they were created, newest first
                     .OrderBy("createdDateTime DESC")
@@ -76,20 +76,35 @@ namespace family_calendar
 
             foreach (var calendarEvent in events)
             {
-                var eh = new EventHolder(){
-                    eh.subject = calendarEvent.Subject;
-                    eh.date = calendarEvent.Start;
-                };
-                eventsList.add(eh);
-                /*Console.WriteLine($"Subject: {calendarEvent.Subject}");
-                Console.WriteLine($"  Organizer: {calendarEvent.Organizer.EmailAddress.Name}");
-                Console.WriteLine($"  Start: {FormatDateTimeTimeZone(calendarEvent.Start)}");
-                Console.WriteLine($"  End: {FormatDateTimeTimeZone(calendarEvent.End)}");*/
+                //Console.WriteLine(calendarEvent.Subject);
+                DateTimeTimeZone start = calendarEvent.Start;
+                DateTimeOffset startOffset = OffsetOfDateTimeTimeZone(start);
+                //Console.WriteLine(startOffset.ToString("g"));
+                DateTimeOffset current = new DateTimeOffset(DateTime.Now);
+                DateTimeOffset plus10 = new DateTimeOffset(DateTime.Now).AddMinutes(10);
+                if(startOffset.CompareTo(current) < 0){
+                    //Console.WriteLine("The date is in the past.");
+                    continue;
+                }
+                if(startOffset.CompareTo(plus10) > 0) {
+                    //Console.WriteLine("The date is in the future.");
+                    continue;
+                }
+                var catEnum = calendarEvent.Categories.GetEnumerator();
+                if(!catEnum.MoveNext()){
+                    //Console.WriteLine("No category.");
+                    continue;
+                }
+                var eventHolder = new EventHolder();
+                eventHolder.Subject = calendarEvent.Subject;
+                eventHolder.Category = catEnum.Current;
+                eventHolder.Date = startOffset;
+                eventsList.Add(eventHolder);
             }
             return eventsList;
         }
 
-        static string FormatDateTimeTimeZone(Microsoft.Graph.DateTimeTimeZone value)
+        static DateTimeOffset OffsetOfDateTimeTimeZone(Microsoft.Graph.DateTimeTimeZone value)
         {
             // Get the timezone specified in the Graph value
             var timeZone = TimeZoneInfo.FindSystemTimeZoneById(value.TimeZone);
@@ -100,7 +115,7 @@ namespace family_calendar
             var dateTimeWithTZ = new DateTimeOffset(dateTime, timeZone.BaseUtcOffset)
                 .ToLocalTime();
 
-            return dateTimeWithTZ.ToString("g");
+            return dateTimeWithTZ;
         }
     }
 }

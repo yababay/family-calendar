@@ -30,7 +30,12 @@ namespace family_calendar
                 var graphHelper = scope.ServiceProvider.GetRequiredService<IGraphHelper>();
                 bool isConnected = graphHelper.IsConnected();
                 if(isConnected){
-                    graphHelper.ListCalendarEvents();
+                    List<EventHolder> eventHolders = graphHelper.ListCalendarEvents();
+                    foreach(var eventHolder in eventHolders)
+                    {
+                        Console.WriteLine(eventHolder.Subject);
+                        Console.WriteLine(eventHolder.Category);
+                    }
                 }
                 else _logger.LogInformation("It's not yet connected...");
                 await Task.Delay(TimeSpan.FromMinutes(5), stoppingToken);
