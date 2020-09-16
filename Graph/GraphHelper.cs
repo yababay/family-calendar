@@ -5,6 +5,11 @@ using System.Threading.Tasks;
 
 namespace family_calendar
 {
+    internal class EventHolder {
+        string subject;
+        Date date;
+    }
+
     public interface IGraphHelper {
         public bool IsConnected();
         public void ListCalendarEvents();
@@ -64,19 +69,24 @@ namespace family_calendar
             }
         }
         // </GetEventsSnippet>
-        public void ListCalendarEvents()
+        public List<EventHolder> ListCalendarEvents()
         {
             var events = GetEventsAsync().Result;
-
-            Console.WriteLine("Events:");
+            List<EventHolder> eventsList = new List<EventHolder>();
 
             foreach (var calendarEvent in events)
             {
-                Console.WriteLine($"Subject: {calendarEvent.Subject}");
+                var eh = new EventHolder(){
+                    eh.subject = calendarEvent.Subject;
+                    eh.date = calendarEvent.Start;
+                };
+                eventsList.add(eh);
+                /*Console.WriteLine($"Subject: {calendarEvent.Subject}");
                 Console.WriteLine($"  Organizer: {calendarEvent.Organizer.EmailAddress.Name}");
                 Console.WriteLine($"  Start: {FormatDateTimeTimeZone(calendarEvent.Start)}");
-                Console.WriteLine($"  End: {FormatDateTimeTimeZone(calendarEvent.End)}");
+                Console.WriteLine($"  End: {FormatDateTimeTimeZone(calendarEvent.End)}");*/
             }
+            return eventsList;
         }
 
         static string FormatDateTimeTimeZone(Microsoft.Graph.DateTimeTimeZone value)
