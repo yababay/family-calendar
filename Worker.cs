@@ -41,6 +41,7 @@ namespace family_calendar
                     List<EventHolder> eventHolders = graphHelper.ListCalendarEvents();
                     foreach(var eventHolder in eventHolders)
                     {
+                        Console.WriteLine(eventHolder.Date.ToString("g"));
                         Console.WriteLine(eventHolder.Subject);
                         Console.WriteLine(eventHolder.Category);
                         using SoundDevice device = SoundDevice.Create(audioSettings);
