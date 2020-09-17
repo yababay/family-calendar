@@ -11,7 +11,8 @@ namespace family_calendar
 {
     public class Program
     {
-        public static void Main(string[] args)
+        //public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
             var appConfig = LoadAppSettings();
 
@@ -31,12 +32,13 @@ namespace family_calendar
             GraphHelper.Initialize(authProvider);
 
             var user = GraphHelper.GetMeAsync().Result;
-            Console.WriteLine($"Welcome {user.DisplayName}!\n");
+            //Console.WriteLine($"Welcome {user.DisplayName}!\n");
             CreateHostBuilder(args).Build().Run();
         }
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>
             Host.CreateDefaultBuilder(args)
+                .UseSystemd()
                 .ConfigureServices((hostContext, services) =>
                 {
                     services.AddScoped<IGraphHelper>(s => new GraphHelper());

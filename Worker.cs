@@ -15,11 +15,19 @@ namespace family_calendar
     {
         private readonly ILogger<Worker> _logger;
         private readonly IServiceScopeFactory _serviceScopeFactory;
+        private readonly SoundConnectionSettings audioSettings = new SoundConnectionSettings();
+        private readonly Dictionary<string, string> themeToSound = new Dictionary<string, string>();
 
         public Worker(ILogger<Worker> logger, IServiceScopeFactory serviceScopeFactory)
         {
             _logger = logger;
             _serviceScopeFactory = serviceScopeFactory ?? throw new ArgumentNullException(nameof(serviceScopeFactory));
+            themeToSound.Add("Занятия Михаила", "atmospheric_tune");
+            themeToSound.Add("Обучение Артёма", "a_windows_phone");
+            themeToSound.Add("Утро", "morning_notification");
+            themeToSound.Add("Общесемейные мероприятия", "morricone");
+            //themeToSound.Add("default", "music_box_new")
+            //themeToSound.Add("", "sony_xperia_z3_new")
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -35,6 +43,12 @@ namespace family_calendar
                     {
                         Console.WriteLine(eventHolder.Subject);
                         Console.WriteLine(eventHolder.Category);
+                        using SoundDevice device = SoundDevice.Create(audioSettings);
+                        string sound;
+                        if (themeToSound.TryGetValue(eventHolder.Category, out sound))
+                        {
+                            device.Play($"./Assets/{sound}.wav");
+                        }
                     }
                 }
                 else _logger.LogInformation("It's not yet connected...");
