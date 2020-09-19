@@ -1,6 +1,6 @@
 # Family calendar
 
-If you have a personal account on one of Microsoft services (Skype, Outlook email, Github etc.), you can plan your events and tasks in comfortable [web interface](https://outlook.live.com/calendar/) for free. My program is a service for Raspberry Pi, that plays sounds according with your Outlook Calendar personal schedule. So, it can be used as an alarm clock, but not only so. The program is written with .NET Core 3.1 SDK.
+If you have a personal account on one of Microsoft services (Skype, Outlook email, Github etc.), you can plan your events and tasks in comfortable [web interface](https://outlook.live.com/calendar/) for free. My program is a service for Raspberry Pi, that plays short sounds (ringtones) according with your Outlook Calendar personal schedule. So, it can be used as an alarm clock, but not only so. The program is written with .NET Core 3.1 SDK.
 
 ## Installation
 
