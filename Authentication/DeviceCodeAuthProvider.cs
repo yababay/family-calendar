@@ -50,7 +50,8 @@ namespace family_calendar
                     await Task.Delay(TimeSpan.FromMinutes(refreshPeriod), stoppingToken);
                 }
                 else {
-                    Console.WriteLine("The token will be refreshed in " + refreshPeriod + " minutes.");
+                    string date = DateTime.Now.ToString("g");
+                    Console.WriteLine($"The token is updated at {date} and will be refreshed in {refreshPeriod} minutes.");
                     var accessToken = await GetAccessToken(); 
                     await Task.Delay(TimeSpan.FromMinutes(refreshPeriod), stoppingToken);
                 }

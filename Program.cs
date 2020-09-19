@@ -32,6 +32,7 @@ namespace family_calendar
 
             var user = GraphHelper.GetMeAsync().Result;
             Console.WriteLine($"Welcome {user.DisplayName}!\n");
+
             CreateHostBuilder(args).Build().Run();
         }
 

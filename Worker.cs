@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Text.Json;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -16,18 +17,11 @@ namespace family_calendar
         private readonly ILogger<Worker> _logger;
         private readonly IServiceScopeFactory _serviceScopeFactory;
         private readonly SoundConnectionSettings audioSettings = new SoundConnectionSettings();
-        private readonly Dictionary<string, string> themeToSound = new Dictionary<string, string>();
 
         public Worker(ILogger<Worker> logger, IServiceScopeFactory serviceScopeFactory)
         {
             _logger = logger;
             _serviceScopeFactory = serviceScopeFactory ?? throw new ArgumentNullException(nameof(serviceScopeFactory));
-            themeToSound.Add("Занятия Михаила", "atmospheric_tune");
-            themeToSound.Add("Обучение Артёма", "a_windows_phone");
-            themeToSound.Add("Утро", "morning_notification");
-            themeToSound.Add("Общесемейные мероприятия", "morricone");
-            //themeToSound.Add("default", "music_box_new")
-            //themeToSound.Add("", "sony_xperia_z3_new")
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -46,6 +40,7 @@ namespace family_calendar
                         Console.WriteLine(eventHolder.Category);
                         using SoundDevice device = SoundDevice.Create(audioSettings);
                         string sound;
+                        var themeToSound = GetSoundsDictionary();
                         if (themeToSound.TryGetValue(eventHolder.Category, out sound))
                         {
                             device.Play($"./Assets/{sound}.wav");
@@ -57,7 +52,7 @@ namespace family_calendar
             }
         }
 
-        static string FormatDateTimeTimeZone(Microsoft.Graph.DateTimeTimeZone value)
+        private static string FormatDateTimeTimeZone(Microsoft.Graph.DateTimeTimeZone value)
         {
             // Get the timezone specified in the Graph value
             var timeZone = TimeZoneInfo.FindSystemTimeZoneById(value.TimeZone);
@@ -69,6 +64,12 @@ namespace family_calendar
                 .ToLocalTime();
 
             return dateTimeWithTZ.ToString("g");
+        }
+
+        private static Dictionary<string, string> GetSoundsDictionary(){
+            var jsonUtf8Bytes = System.IO.File.ReadAllBytes("./categories2sound.json");
+            var readOnlySpan  = new ReadOnlySpan<byte>(jsonUtf8Bytes);
+            return JsonSerializer.Deserialize<Dictionary<string, string>>(readOnlySpan);
         }
     }
 }
