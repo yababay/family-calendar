@@ -53,6 +53,7 @@ Now place some wav-files into `/srv/family-calendar/Assets` directory and edit t
 The last step is to run the service:
 
 ```
+sudo ln -s `pwd`/family-calendar.service /etc/systemd/system
 sudo systemctl start family-calendar.service
 ```
 
