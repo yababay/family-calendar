@@ -41,6 +41,7 @@ namespace family_calendar
                 .ConfigureServices((hostContext, services) =>
                 {
                     services.AddScoped<IGraphHelper>(s => new GraphHelper());
+                    services.AddHostedService<DeviceCodeAuthProvider>();
                     services.AddHostedService<Worker>();
                 });
 

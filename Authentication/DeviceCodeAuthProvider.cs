@@ -8,15 +8,20 @@ using System;
 using System.IO;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Hosting;
 
 namespace family_calendar
 {
-    public class DeviceCodeAuthProvider : IAuthenticationProvider
+    public class DeviceCodeAuthProvider : BackgroundService, IAuthenticationProvider
     {
-        private IPublicClientApplication _msalClient;
-        private string[] _scopes;
-        private IAccount _userAccount;
+        private static IPublicClientApplication _msalClient;
+        private static string[] _scopes;
+        private static IAccount _userAccount;
+        private static int refreshPeriod = -1;
+
+        public DeviceCodeAuthProvider(){}
 
         public DeviceCodeAuthProvider(string appId, string[] scopes)
         {
@@ -26,6 +31,15 @@ namespace family_calendar
                 .Create(appId)
                 .WithAuthority(AadAuthorityAudience.AzureAdAndPersonalMicrosoftAccount, true)
                 .Build();
+        }
+
+        protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+        {
+            while (!stoppingToken.IsCancellationRequested)
+            {
+                Console.WriteLine("Waiting for authentication...");
+                await Task.Delay(TimeSpan.FromSeconds(5), stoppingToken);
+            }
         }
 
         public async Task<string> GetAccessToken()
