@@ -5,7 +5,6 @@
 using Microsoft.Graph;
 using Microsoft.Identity.Client;
 using System;
-using System.IO;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading;
@@ -20,6 +19,8 @@ namespace family_calendar
         private static string[] _scopes;
         private static IAccount _userAccount;
         private static int refreshPeriod = -1;
+        private static bool firstTime = true;
+        private static readonly int before = 2;
 
         public DeviceCodeAuthProvider(){}
 
@@ -37,9 +38,28 @@ namespace family_calendar
         {
             while (!stoppingToken.IsCancellationRequested)
             {
-                Console.WriteLine("Waiting for authentication...");
-                await Task.Delay(TimeSpan.FromSeconds(5), stoppingToken);
+                if(refreshPeriod == -1)
+                {
+                    Console.WriteLine("Waiting for authentication...");
+                    await Task.Delay(TimeSpan.FromSeconds(5), stoppingToken);
+                }
+                else if(firstTime)
+                {
+                    firstTime = false;
+                    Console.WriteLine("The token will be refreshed in " + refreshPeriod + " minutes for the first time.");
+                    await Task.Delay(TimeSpan.FromMinutes(refreshPeriod), stoppingToken);
+                }
+                else {
+                    Console.WriteLine("The token will be refreshed in " + refreshPeriod + " minutes.");
+                    var accessToken = await GetAccessToken(); 
+                    await Task.Delay(TimeSpan.FromMinutes(refreshPeriod), stoppingToken);
+                }
             }
+        }
+
+        private void SetRefreshPeriod(DateTimeOffset expiresOn)
+        {
+            refreshPeriod = (expiresOn - DateTime.UtcNow).Minutes - before;
         }
 
         public async Task<string> GetAccessToken()
@@ -52,14 +72,11 @@ namespace family_calendar
                     // Invoke device code flow so user can sign-in with a browser
                     var result = await _msalClient.AcquireTokenWithDeviceCode(_scopes, callback => {
                         Console.WriteLine(callback.Message);
-                        using (StreamWriter outputFile = new StreamWriter("./the-code.txt"))
-                        {
-                            outputFile.WriteLine(callback.Message);
-                        }
                         return Task.FromResult(0);
                     }).ExecuteAsync();
 
                     _userAccount = result.Account;
+                    SetRefreshPeriod(result.ExpiresOn);
                     return result.AccessToken;
                 }
                 catch (Exception exception)
@@ -78,6 +95,7 @@ namespace family_calendar
                         .AcquireTokenSilent(_scopes, _userAccount)
                         .ExecuteAsync();
 
+                    SetRefreshPeriod(result.ExpiresOn);
                     return result.AccessToken;
             }
         }

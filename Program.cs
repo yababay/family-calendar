@@ -27,7 +27,7 @@ namespace family_calendar
 
             var authProvider = new DeviceCodeAuthProvider(appId, scopes);
 
-            var accessToken = authProvider.GetAccessToken().Result;
+            //var accessToken = authProvider.GetAccessToken().Result;
             GraphHelper.Initialize(authProvider);
 
             var user = GraphHelper.GetMeAsync().Result;
@@ -41,8 +41,8 @@ namespace family_calendar
                 .ConfigureServices((hostContext, services) =>
                 {
                     services.AddScoped<IGraphHelper>(s => new GraphHelper());
-                    services.AddHostedService<DeviceCodeAuthProvider>();
                     services.AddHostedService<Worker>();
+                    services.AddHostedService<DeviceCodeAuthProvider>();
                 });
 
         static IConfigurationRoot LoadAppSettings()
