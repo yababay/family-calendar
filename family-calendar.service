@@ -2,7 +2,6 @@
 Description=Family calendar
 
 [Service]
-Environment=DOTNET_ROOT=/home/pi/.3f-lab/_bin/dotnet
 Type=notify
 ExecStart=/srv/family-calendar/family-calendar
 WorkingDirectory=/srv/family-calendar
