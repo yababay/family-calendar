@@ -49,6 +49,7 @@ namespace family_calendar
             try
             {
                 // GET /me/events
+                //var resultPage = await graphClient.Me.CalendarView.Request()
                 var resultPage = await graphClient.Me.Events.Request()
                     // Only return the fields used by the application
                     .Select(e => new {
