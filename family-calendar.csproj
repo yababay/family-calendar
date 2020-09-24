@@ -12,6 +12,6 @@
     <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="3.1.7" />
     <PackageReference Include="Microsoft.Graph" Version="3.0.1" />
     <PackageReference Include="Microsoft.Identity.Client" Version="4.10.0" />
-    <ProjectReference Include="../alsa/Alsa.csproj" />
+    <!-- ProjectReference Include="../alsa/Alsa.csproj" / -->
   </ItemGroup>
 </Project>

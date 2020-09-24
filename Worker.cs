@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text.Json;
 using System.Linq;
 using System.Threading;
@@ -8,7 +9,6 @@ using Microsoft.Graph;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Iot.Device.Media;
 
 namespace family_calendar
 {
@@ -16,7 +16,6 @@ namespace family_calendar
     {
         private readonly ILogger<Worker> _logger;
         private readonly IServiceScopeFactory _serviceScopeFactory;
-        private readonly SoundConnectionSettings audioSettings = new SoundConnectionSettings();
 
         public Worker(ILogger<Worker> logger, IServiceScopeFactory serviceScopeFactory)
         {
@@ -37,14 +36,8 @@ namespace family_calendar
                     {
                         Console.WriteLine(eventHolder.Date.ToString("g"));
                         Console.WriteLine(eventHolder.Subject);
-                        Console.WriteLine(eventHolder.Category);
-                        using SoundDevice device = SoundDevice.Create(audioSettings);
-                        string sound;
-                        var themeToSound = GetSoundsDictionary();
-                        if (themeToSound.TryGetValue(eventHolder.Category, out sound))
-                        {
-                            device.Play($"./Assets/{sound}.wav");
-                        }
+                        var output = ExecuteBashCommand($"/srv/family-calendar/play.sh {eventHolder.Category}");
+                        Console.WriteLine(output);
                     }
                 }
                 else _logger.LogInformation("It's not yet connected...");
@@ -66,10 +59,29 @@ namespace family_calendar
             return dateTimeWithTZ.ToString("g");
         }
 
-        private static Dictionary<string, string> GetSoundsDictionary(){
-            var jsonUtf8Bytes = System.IO.File.ReadAllBytes("./categories2sound.json");
-            var readOnlySpan  = new ReadOnlySpan<byte>(jsonUtf8Bytes);
-            return JsonSerializer.Deserialize<Dictionary<string, string>>(readOnlySpan);
+        static string ExecuteBashCommand(string command)
+        {
+            // according to: https://stackoverflow.com/a/15262019/637142
+            // thans to this we will pass everything as one command
+            command = command.Replace("\"","\"\"");
+
+            var proc = new System.Diagnostics.Process
+            {
+                StartInfo = new ProcessStartInfo
+                {
+                    FileName = "/bin/bash",
+                    Arguments = "-c \""+ command + "\"",
+                    UseShellExecute = false,
+                    RedirectStandardOutput = true,
+                    CreateNoWindow = true
+                }
+            };
+
+            proc.Start();
+            proc.WaitForExit();
+
+            return proc.StandardOutput.ReadToEnd();
         }
+
     }
 }
